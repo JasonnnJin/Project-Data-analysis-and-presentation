@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Computer Price Prediction</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+<h1>Pridiction of computer price</h1>
+
+<p>
+    In an increasingly digital world, the demand for laptops has skyrocketed, with consumers seeking a wide range of specifications, features, and price points. Understanding the dynamics of the laptop market is crucial for manufacturers, retailers, and even consumers. This project focuses on analyzing a dataset from Kaggle that includes various specifications of laptops, such as brand, processor, RAM, storage, and pricing. By leveraging data analysis and visualization, this study aims to uncover trends, consumer preferences, and factors that influence pricing. This insight will help better understand the market landscape and guide decision-making for both companies and individuals. The importance of this topic lies in its relevance to the constantly evolving tech industry and how data can drive market strategies.
+</p>
+
+<p>
+<h2>Data Introduction</h2><br>
+    ●	File Name: <a href="https://www.kaggle.com/datasets/pradeepjangirml007/laptop-data-set/data?fbclid=IwY2xjawF2PKFleHRuA2FlbQIxMAABHbEj7j6fSs4vgyoh39sOcHSxcvid504o5QXfhI8_ege7UAxXSJXmKC8coQ_aem_80eqPNNuxB9Fld5vYd7C9w" target="_blank">laptop.csv</a><br>
+●	Data Size: The dataset will be analyzed and cleaned as part of the process. I will load and inspect the size, number of columns, and rows in the next step.<br>
+●	Source: Since the dataset has been provided by you, it is assumed to be curated for a specific purpose (you could add whether this data is collected from sales records, reviews, or industry reports).<br>
+●	Contents: The dataset likely contains details about laptops such as their specifications, prices, brands, performance ratings, etc. I will load and inspect the dataset to confirm the exact content.<br>
+</p>
+
+<h2>Plot for feature correlation</h2><br>
+<img src="All_feautre_corr.png" alt="Image for all features correlation" style="width:400px;height:auto;">
+<img src="Feautre_corr_price.png" alt="Image for correlation between features and price" style="width:400px;height:auto;">
+
+<h2>Interactive predict for computer price</h2><br>
+<p>Please select the necessary hardware configuration and click the button to generate the predicted price</p>
+
+<div id="config-selection">
+    <!--  -->
+</div>
+
+<button onclick="predictPrice()">price prediction</button>
+
+<p id="predicted_price">price prediction: </p>
+
+<script>
+    function loadConfigOptions() {
+        fetch('category_data.json')
+            .then(response => response.json())
+            .then(data => {
+                const configDiv = document.getElementById("config-selection");
+                Object.keys(data).forEach(category => {
+                    const label = document.createElement("label");
+                    label.innerText = `${category}: `;
+                    configDiv.appendChild(label);
+
+                    const select = document.createElement("select");
+                    select.id = category.toLowerCase().replace(/\s+/g, "_"); // 标准化 ID 名称
+                    const options = data[category];
+
+                    Object.keys(options).forEach(key => {
+                        const option = document.createElement("option");
+                        option.value = key;
+                        option.text = options[key];
+                        select.appendChild(option);
+                    });
+
+                    configDiv.appendChild(select);
+                    configDiv.appendChild(document.createElement("br"));
+                });
+            })
+            .catch(error => console.error("Error loading JSON data:", error));
+    }
+
+    loadConfigOptions();
+
+    const weights = {
+        brand: -2.97541980e-04,
+        processor: 8.02482021e-04,
+        ram_expandable: 2.99028515e-03,
+        ram: 1.81854033e-02,
+        ram_type: -2.46630084e-03,
+        ghz: 6.98171491e-02,
+        display_type: 5.12732040e-04,
+        display: 5.09207593e-03,
+        gpu: 1.21191306e-04,
+        ssd: 2.28357886e-03,
+        hdd: -1.59148285e-02,
+        adapter: 1.96906934e-01,
+        battery: 7.28071929e-05,
+        bias: -0.01675740799774597
+    };
+
+    function predictPrice() {
+        // 确保获取元素的ID名称与动态生成的ID名称一致
+        const brand = parseInt(document.getElementById("brand").value);
+        const processor = parseInt(document.getElementById("processor_name").value);
+        const ram_expandable = parseInt(document.getElementById("ram_expandable").value);
+        const ram = parseInt(document.getElementById("ram").value);
+        const ram_type = parseInt(document.getElementById("ram_type").value);
+        const ghz = parseFloat(document.getElementById("ghz").value);
+        const display_type = parseInt(document.getElementById("display_type").value);
+        const display = parseInt(document.getElementById("display").value);
+        const gpu = parseInt(document.getElementById("gpu").value);
+        const ssd = parseInt(document.getElementById("ssd").value);
+        const hdd = parseInt(document.getElementById("hdd").value);
+        const adapter = parseFloat(document.getElementById("adapter").value);
+        const battery = parseInt(document.getElementById("battery_life").value);
+
+        const variables = {
+            brand, processor, ram_expandable, ram, ram_type, ghz, display_type,
+            display, gpu, ssd, hdd, adapter, battery
+        };
+
+        // 检查每个变量的值是否存在
+        for (const [key, value] of Object.entries(variables)) {
+            if (isNaN(value) || value === null) {
+                console.error(`Error: ${key} 的值不存在或无效`);
+            }
+        }
+
+        // 计算价格
+        let price = (brand * weights.brand +
+        processor * weights.processor +
+        ram_expandable * weights.ram_expandable +
+        ram * weights.ram +
+        ram_type * weights.ram_type +
+        ghz * weights.ghz +
+        display_type * weights.display_type +
+        display * weights.display +
+        gpu * weights.gpu +
+        ssd * weights.ssd +
+        hdd * weights.hdd +
+        adapter * weights.adapter +
+        battery * weights.battery +
+        weights.bias)*495900 + 7990;
+
+        document.getElementById("predicted_price").innerText = `Price prediction: ${price.toFixed(2)}`;
+    }
+</script>
+
+
+<!--<script>-->
+<!--    function loadConfigOptions() {-->
+<!--        fetch('category_data.json')-->
+<!--            .then(response => response.json())-->
+<!--            .then(data => {-->
+<!--                const configDiv = document.getElementById("config-selection");-->
+<!--                Object.keys(data).forEach(category => {-->
+<!--                    const label = document.createElement("label");-->
+<!--                    label.innerText = `${category}: `;-->
+<!--                    configDiv.appendChild(label);-->
+
+<!--                    const select = document.createElement("select");-->
+<!--                    select.id = category.toLowerCase();-->
+<!--                    const options = data[category];-->
+
+<!--                    Object.keys(options).forEach(key => {-->
+<!--                        const option = document.createElement("option");-->
+<!--                        option.value = key;-->
+<!--                        option.text = options[key];-->
+<!--                        select.appendChild(option);-->
+<!--                    });-->
+
+<!--                    configDiv.appendChild(select);-->
+<!--                    configDiv.appendChild(document.createElement("br"));-->
+<!--                });-->
+<!--            })-->
+<!--            .catch(error => console.error("Error loading JSON data:", error));-->
+<!--    }-->
+
+<!--    loadConfigOptions();-->
+<!--    const weights = {-->
+<!--        brand: -2.97541980e-04,-->
+<!--        processor: 8.02482021e-04,-->
+<!--                ram_expandable: 2.99028515e-03,-->
+<!--                ram: 1.81854033e-02,-->
+<!--        ram_type: -2.46630084e-03,-->
+<!--        Ghz: 6.98171491e-02,-->
+<!--        display_type: 5.12732040e-04,-->
+<!--        display: 5.09207593e-03,-->
+<!--                gpu: 1.21191306e-04,-->
+<!--        ssd: 2.28357886e-03,-->
+<!--        hdd: -1.59148285e-02,-->
+<!--        adapter: 1.96906934e-01,-->
+<!--         battery: 7.28071929e-05,-->
+<!--        bias: -0.01675740799774597-->
+<!--    };-->
+
+<!--    function predictPrice() {-->
+<!--        //-->
+<!--        const brand = parseInt(document.getElementById("Brand").value);-->
+<!--        const processor = parseInt(document.getElementById("Processor_Name").value);-->
+<!--        const ram_expandable = parseInt(document.getElementById("RAM_Expandable").value);-->
+<!--        const ram = parseInt(document.getElementById("RAM").value);-->
+<!--        const ram_type = parseInt(document.getElementById("RAM_TYPE").value);-->
+<!--        const Ghz = parseFloat(document.getElementById("Ghz").value);-->
+<!--        const display_type = parseInt(document.getElementById("Display_type").value);-->
+<!--        const display = parseInt(document.getElementById("Display").value);-->
+<!--        const gpu = parseInt(document.getElementById("GPU").value);-->
+<!--        const ssd = parseInt(document.getElementById("SSD").value);-->
+<!--        const hdd = parseInt(document.getElementById("HDD").value);-->
+<!--        const adapter = parseFloat(document.getElementById("Adapter").value);-->
+<!--        const battery = parseInt(document.getElementById("Battery_Life").value);-->
+
+<!--        const variables = {-->
+<!--            brand, processor, ram_expandable, ram, ram_type, Ghz, display_type,-->
+<!--            display, gpu, ssd, hdd, adapter, battery-->
+<!--        };-->
+
+<!--        // 检查每个变量的值是否存在-->
+<!--        for (const [key, value] of Object.entries(variables)) {-->
+<!--            if (isNaN(value) || value === null) {-->
+<!--                console.error(`Error: ${key} 的值不存在或无效`);-->
+<!--            }-->
+<!--        }-->
+
+<!--        //-->
+<!--        let price = brand * weights.brand +-->
+<!--        processor * weights.processor +-->
+<!--        ram_expandable * weights.ram_expandable +-->
+<!--        ram * weights.ram +-->
+<!--        ram_type * weights.ram_type +-->
+<!--        Ghz * weights.Ghz +-->
+<!--        display_type * weights.display_type +-->
+<!--        display * weights.display +-->
+<!--        gpu * weights.gpu +-->
+<!--        ssd * weights.ssd +-->
+<!--        hdd * weights.hdd +-->
+<!--        adapter * weights.adapter +-->
+<!--        battery * weights.battery +-->
+<!--        weights.bias;-->
+
+<!--        //-->
+<!--        document.getElementById("predicted_price").innerText = `Price preidction: $${price.toFixed(2)}`;-->
+<!--    }-->
+<!--</script>-->
+
+<!--<div id="price-battery-chart"></div>-->
+<!--<script>-->
+<!--    //-->
+<!--    Plotly.d3.csv('laptops.csv', function(err, rows){-->
+<!--        if(err) {-->
+<!--            console.error("Error loading CSV:", err);-->
+<!--            return;-->
+<!--        }-->
+<!--        const prices = rows.map(row => parseFloat(row['Price']));-->
+<!--        const battery_life = rows.map(row => parseFloat(row['Battery_Life_num']));-->
+<!--        const text = rows.map(row => `${row.Brand} ${row.Processor_Name} ${row.RAM} ${row.RAM_TYPE} ${row.Display_type} ${row.GPU} ${row.SSD} ${row.HDD}`);-->
+
+<!--        const data = [{-->
+<!--            x: prices,-->
+<!--            y: battery_life,-->
+<!--            mode: 'markers',-->
+<!--            type: 'scatter',-->
+<!--            text: text,-->
+<!--            marker: { size: 12 }-->
+<!--        }];-->
+
+<!--        const layout = {-->
+<!--            title: 'Price vs Battery Life',-->
+<!--            xaxis: { title: 'Price' },-->
+<!--            yaxis: { title: 'Battery Life' }-->
+<!--        };-->
+
+<!--        Plotly.newPlot('price-battery-chart', data, layout);-->
+<!--    });-->
+<!--</script>-->
+
+<h2>Interactive plot for all computer information</h2><br>
+<p>Please hover your mouse over the dots and the necessary hardware parameters of each computer will be displayed.</p>
+<div id="price-battery-chart"></div>
+<script>
+    Plotly.d3.csv('laptops.csv', function(err, rows){
+        if(err) {
+            console.error("Error loading CSV:", err);
+            return;
+        }
+
+        try {
+            const brands = [...new Set(rows.map(row => row['Brand']))];
+            const data = brands.map(brand => {
+                const filteredRows = rows.filter(row => row['Brand'] === brand);
+
+                return {
+                    x: filteredRows.map(row => parseFloat(row['Price'])),
+                    y: filteredRows.map(row => parseFloat(row['Battery_Life_num'])),
+                    mode: 'markers',
+                    type: 'scatter',
+                    name: brand,
+                    marker: { size: 12 },
+                    text: filteredRows.map(row => {
+                        return `Brand: ${row['Brand']}<br>` +
+                               `Processor: ${row['Processor_Name']}<br>` +
+                               `Price: ${row['Price']}<br>` +
+                               `Battery Life: ${row['Battery_Life']}<br>` +
+                               `RAM: ${row['RAM']}<br>` +
+                               `SSD: ${row['SSD']}<br>` +
+                               `HDD: ${row['HDD']}<br>` +
+                               `GPU: ${row['GPU']}`;
+                    })
+                };
+            });
+
+            const layout = {
+                title: 'Price vs Battery Life',
+                xaxis: { title: 'Price' },
+                yaxis: { title: 'Battery Life' }
+            };
+
+            Plotly.newPlot('price-battery-chart', data, layout);
+        } catch (error) {
+            console.error("Error processing data:", error);
+        }
+    });
+</script>
+
+
+</body>
+</html>
