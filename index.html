@@ -23,8 +23,15 @@
 
 <h2>Plot for feature correlation</h2><br>
 <img src="All_feautre_corr.png" alt="Image for all features correlation" style="width:400px;height:auto;">
-<img src="Feautre_corr_price.png" alt="Image for correlation between features and price" style="width:400px;height:auto;">
+<img src="Feautre_corr_price.png" alt="Image for correlation between features and price" style="width:400px;height:auto;"><br>
+<img src="brand_distribution.png" alt="Image for correlation between features and price" style="width:800px;height:auto;">
 
+<p>The correlation heatmap illustrates the relationships between various hardware features and their correlation with price. Notably, the features with the strongest correlation to Price are Adapter and Ghz, indicating that these characteristics may significantly impact computer pricing. Additionally, RAM (memory) and Display (screen size) also show a positive correlation with Price, suggesting that computers with larger memory and screen size tend to be more expensive. Some features, such as Adapter and Battery_Life, also exhibit clear correlations, implying that higher-powered adapters are often associated with longer battery life.
+<br>
+In the brand distribution bar chart, it is evident that ASUS, Lenovo, HP, Dell, and Acer are the most common brands in the dataset, with ASUS having a significantly higher count than other brands. Well-known brands like Microsoft and Apple are present but less frequent. Other brands, such as RDP, Nokia, and VAIO, appear very rarely, indicating their lower representation in the dataset.
+<br>
+Overall, these visualizations suggest that different brands and hardware features have distinct impacts on price. Devices with higher frequency processors, more powerful adapters, and larger memory tend to be priced higher. Furthermore, the brand distribution highlights that the mainstream market is dominated by a few major brands, particularly ASUS, Lenovo, and HP, which occupy a relatively large market share.</p>
+<br>
 <h2>Interactive predict for computer price</h2><br>
 <p>Please select the necessary hardware configuration and click the button to generate the predicted price</p>
 
@@ -308,6 +315,15 @@
     });
 </script>
 
+<h2>Summary</h2><br>
+This analysis uses linear regression to predict computer prices based on hardware specifications. The correlation heatmap shows that features like Adapter, Ghz, RAM, and Display size are key factors influencing price, with higher power adapters, greater processor frequencies, and larger memory generally associated with higher prices. The brand distribution highlights that the market is primarily dominated by brands like ASUS, Lenovo, and HP, while other brands are less represented. By incorporating these hardware characteristics into the linear regression model, we aim to estimate computer prices more accurately based on their specific configurations.
+<br>
 
+<h2>Reference</h2><br>
+<P>
+   	1.	“Analyzing Consumer Preferences for Laptop Features Using Conjoint Analysis” - This paper explores how consumers value different laptop features, helping contextualize the data analysis in terms of consumer preferences.<br>
+   	2.	“Market Segmentation in the Electronics Industry: A Case Study of the Laptop Market” - This reference offers insights into how the laptop market is segmented, providing a backdrop for further analysis of the dataset.<br>
+
+</P>
 </body>
 </html>
