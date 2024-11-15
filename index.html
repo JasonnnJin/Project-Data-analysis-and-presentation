@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Computer Price Prediction</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
 </head>
 <body>
 
@@ -15,34 +18,34 @@
 
 <p>
 <h2>Data Introduction</h2><br>
-    ●	File Name: <a href="https://www.kaggle.com/datasets/pradeepjangirml007/laptop-data-set/data?fbclid=IwY2xjawF2PKFleHRuA2FlbQIxMAABHbEj7j6fSs4vgyoh39sOcHSxcvid504o5QXfhI8_ege7UAxXSJXmKC8coQ_aem_80eqPNNuxB9Fld5vYd7C9w" target="_blank">laptop.csv</a><br>
+●	File Name: <a href="https://www.kaggle.com/datasets/pradeepjangirml007/laptop-data-set/data?fbclid=IwY2xjawF2PKFleHRuA2FlbQIxMAABHbEj7j6fSs4vgyoh39sOcHSxcvid504o5QXfhI8_ege7UAxXSJXmKC8coQ_aem_80eqPNNuxB9Fld5vYd7C9w" target="_blank">laptop.csv</a><br>
 ●	Data Size: The dataset will be analyzed and cleaned as part of the process. I will load and inspect the size, number of columns, and rows in the next step.<br>
 ●	Source: Since the dataset has been provided by you, it is assumed to be curated for a specific purpose (you could add whether this data is collected from sales records, reviews, or industry reports).<br>
 ●	Contents: The dataset likely contains details about laptops such as their specifications, prices, brands, performance ratings, etc. I will load and inspect the dataset to confirm the exact content.<br>
 </p>
 
-<h2>Plot for feature correlation</h2><br>
+<h2>Plot for Feature Correlation</h2><br>
 <img src="All_feautre_corr.png" alt="Image for all features correlation" style="width:400px;height:auto;">
 <img src="Feautre_corr_price.png" alt="Image for correlation between features and price" style="width:400px;height:auto;"><br>
 <img src="brand_distribution.png" alt="Image for correlation between features and price" style="width:800px;height:auto;">
 
-<p>The correlation heatmap illustrates the relationships between various hardware features and their correlation with price. Notably, the features with the strongest correlation to Price are Adapter and Ghz, indicating that these characteristics may significantly impact computer pricing. Additionally, RAM (memory) and Display (screen size) also show a positive correlation with Price, suggesting that computers with larger memory and screen size tend to be more expensive. Some features, such as Adapter and Battery_Life, also exhibit clear correlations, implying that higher-powered adapters are often associated with longer battery life.
-<br>
-In the brand distribution bar chart, it is evident that ASUS, Lenovo, HP, Dell, and Acer are the most common brands in the dataset, with ASUS having a significantly higher count than other brands. Well-known brands like Microsoft and Apple are present but less frequent. Other brands, such as RDP, Nokia, and VAIO, appear very rarely, indicating their lower representation in the dataset.
-<br>
-Overall, these visualizations suggest that different brands and hardware features have distinct impacts on price. Devices with higher frequency processors, more powerful adapters, and larger memory tend to be priced higher. Furthermore, the brand distribution highlights that the mainstream market is dominated by a few major brands, particularly ASUS, Lenovo, and HP, which occupy a relatively large market share.</p>
-<br>
-<h2>Interactive predict for computer price</h2><br>
+<p>The correlation heatmap illustrates the relationships between various hardware features and their correlation with price...</p>
+
+<h2>Interactive Prediction for Computer Price</h2><br>
 <p>Please select the necessary hardware configuration and click the button to generate the predicted price</p>
 
 <div id="config-selection">
-    <!--  -->
+    <!-- Configuration selection options will go here -->
 </div>
 
-<button onclick="predictPrice()">price prediction</button>
+<button onclick="predictPrice()">Price Prediction</button>
 
-<p id="predicted_price">price prediction: </p>
+<p id="predicted_price">Price prediction: </p>
 
+<p>The plot for price:</p>
+<div id="chart"></div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
     function loadConfigOptions() {
         fetch('category_data.json')
@@ -55,7 +58,7 @@ Overall, these visualizations suggest that different brands and hardware feature
                     configDiv.appendChild(label);
 
                     const select = document.createElement("select");
-                    select.id = category.toLowerCase().replace(/\s+/g, "_"); // 标准化 ID 名称
+                    select.id = category.toLowerCase().replace(/\s+/g, "_");
                     const options = data[category];
 
                     Object.keys(options).forEach(key => {
@@ -91,8 +94,52 @@ Overall, these visualizations suggest that different brands and hardware feature
         bias: -0.01675740799774597
     };
 
+    const svg = d3.select("#chart")
+        .append("svg")
+        .attr("width", 1500)
+        .attr("height", 100);
+
+    // Draw the gradient bar
+    svg.append("rect")
+        .attr("class", "bar")
+        .attr("x", 50)
+        .attr("y", 30)
+        .attr("width", 1200)
+        .attr("height", 20)
+        .style("fill", "url(#gradient)");
+
+    // Define the gradient
+    svg.append("defs")
+        .append("linearGradient")
+        .attr("id", "gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%")
+        .selectAll("stop")
+        .data([
+            { offset: "0%", color: "green" },
+            { offset: "100%", color: "red" }
+        ])
+        .enter()
+        .append("stop")
+        .attr("offset", d => d.offset)
+        .attr("stop-color", d => d.color);
+
+    // Add an arrow to indicate price position
+    const arrow = svg.append("polygon")
+        .attr("points", "0,0 10,20 -10,20")
+        .attr("fill", "black")
+        .attr("transform", "translate(50, 20)"); // Initial position
+
+    // Price label
+    const priceLabel = svg.append("text")
+        .attr("class", "price-label")
+        .attr("y", 25)
+        .attr("text-anchor", "middle")
+        .style("font-weight", "bold");
+
     function predictPrice() {
-        // 确保获取元素的ID名称与动态生成的ID名称一致
         const brand = parseInt(document.getElementById("brand").value);
         const processor = parseInt(document.getElementById("processor_name").value);
         const ram_expandable = parseInt(document.getElementById("ram_expandable").value);
@@ -107,37 +154,43 @@ Overall, these visualizations suggest that different brands and hardware feature
         const adapter = parseFloat(document.getElementById("adapter").value);
         const battery = parseInt(document.getElementById("battery_life").value);
 
-        const variables = {
-            brand, processor, ram_expandable, ram, ram_type, ghz, display_type,
-            display, gpu, ssd, hdd, adapter, battery
-        };
+        const variables = { brand, processor, ram_expandable, ram, ram_type, ghz, display_type, display, gpu, ssd, hdd, adapter, battery };
 
-        // 检查每个变量的值是否存在
         for (const [key, value] of Object.entries(variables)) {
             if (isNaN(value) || value === null) {
-                console.error(`Error: ${key} 的值不存在或无效`);
+                console.error(`Error: ${key} is invalid`);
             }
         }
 
-        // 计算价格
         let price = (brand * weights.brand +
-        processor * weights.processor +
-        ram_expandable * weights.ram_expandable +
-        ram * weights.ram +
-        ram_type * weights.ram_type +
-        ghz * weights.ghz +
-        display_type * weights.display_type +
-        display * weights.display +
-        gpu * weights.gpu +
-        ssd * weights.ssd +
-        hdd * weights.hdd +
-        adapter * weights.adapter +
-        battery * weights.battery +
-        weights.bias)*495900 + 7990;
+                     processor * weights.processor +
+                     ram_expandable * weights.ram_expandable +
+                     ram * weights.ram +
+                     ram_type * weights.ram_type +
+                     ghz * weights.ghz +
+                     display_type * weights.display_type +
+                     display * weights.display +
+                     gpu * weights.gpu +
+                     ssd * weights.ssd +
+                     hdd * weights.hdd +
+                     adapter * weights.adapter +
+                     battery * weights.battery +
+                     weights.bias) * 495900 + 7990;
 
-        document.getElementById("predicted_price").innerText = `Price prediction: ${price.toFixed(2)}`;
+        document.getElementById("predicted_price").innerText = `Price prediction: $${price.toFixed(2)}`;
+
+        const scale = d3.scaleLinear().domain([0, 600000]).range([50, 1450]);
+
+        svg.select(".price-label")
+            .text(`$${price.toFixed(2)}`)
+            .attr("x", scale(price));
+
+        arrow.transition()
+            .duration(750)
+            .attr("transform", `translate(${scale(price)}, 50)`);
     }
 </script>
+
 
 
 <!--<script>-->
@@ -267,53 +320,66 @@ Overall, these visualizations suggest that different brands and hardware feature
 <!--    });-->
 <!--</script>-->
 
-<h2>Interactive plot for all computer information</h2><br>
+<h2>Interactive Plot for All Computer Information</h2>
 <p>Please hover your mouse over the dots and the necessary hardware parameters of each computer will be displayed.</p>
-<div id="price-battery-chart"></div>
-<script>
-    Plotly.d3.csv('laptops.csv', function(err, rows){
-        if(err) {
-            console.error("Error loading CSV:", err);
-            return;
-        }
 
-        try {
-            const brands = [...new Set(rows.map(row => row['Brand']))];
-            const data = brands.map(brand => {
-                const filteredRows = rows.filter(row => row['Brand'] === brand);
+<!-- Div to hold the chart -->
+<!--<div id="price-battery-chart"></div>-->
 
-                return {
-                    x: filteredRows.map(row => parseFloat(row['Price'])),
-                    y: filteredRows.map(row => parseFloat(row['Battery_Life_num'])),
-                    mode: 'markers',
-                    type: 'scatter',
-                    name: brand,
-                    marker: { size: 12 },
-                    text: filteredRows.map(row => {
-                        return `Brand: ${row['Brand']}<br>` +
-                               `Processor: ${row['Processor_Name']}<br>` +
-                               `Price: ${row['Price']}<br>` +
-                               `Battery Life: ${row['Battery_Life']}<br>` +
-                               `RAM: ${row['RAM']}<br>` +
-                               `SSD: ${row['SSD']}<br>` +
-                               `HDD: ${row['HDD']}<br>` +
-                               `GPU: ${row['GPU']}`;
-                    })
-                };
-            });
+<!--<script>-->
+<!--    vegaEmbed('#price-battery-chart', 'price_battery_chart.html').catch(console.error);-->
+<!--</script>-->
 
-            const layout = {
-                title: 'Price vs Battery Life',
-                xaxis: { title: 'Price' },
-                yaxis: { title: 'Battery Life' }
-            };
+<iframe src="price_battery_chart.html" width="100%" height="600" style="border:none;"></iframe>
 
-            Plotly.newPlot('price-battery-chart', data, layout);
-        } catch (error) {
-            console.error("Error processing data:", error);
-        }
-    });
-</script>
+
+<!--<h2>Interactive plot for all computer information</h2><br>-->
+<!--<p>Please hover your mouse over the dots and the necessary hardware parameters of each computer will be displayed.</p>-->
+<!--<div id="price-battery-chart"></div>-->
+<!--<script>-->
+<!--    Plotly.d3.csv('laptops.csv', function(err, rows){-->
+<!--        if(err) {-->
+<!--            console.error("Error loading CSV:", err);-->
+<!--            return;-->
+<!--        }-->
+
+<!--        try {-->
+<!--            const brands = [...new Set(rows.map(row => row['Brand']))];-->
+<!--            const data = brands.map(brand => {-->
+<!--                const filteredRows = rows.filter(row => row['Brand'] === brand);-->
+
+<!--                return {-->
+<!--                    x: filteredRows.map(row => parseFloat(row['Price'])),-->
+<!--                    y: filteredRows.map(row => parseFloat(row['Battery_Life_num'])),-->
+<!--                    mode: 'markers',-->
+<!--                    type: 'scatter',-->
+<!--                    name: brand,-->
+<!--                    marker: { size: 12 },-->
+<!--                    text: filteredRows.map(row => {-->
+<!--                        return `Brand: ${row['Brand']}<br>` +-->
+<!--                               `Processor: ${row['Processor_Name']}<br>` +-->
+<!--                               `Price: ${row['Price']}<br>` +-->
+<!--                               `Battery Life: ${row['Battery_Life']}<br>` +-->
+<!--                               `RAM: ${row['RAM']}<br>` +-->
+<!--                               `SSD: ${row['SSD']}<br>` +-->
+<!--                               `HDD: ${row['HDD']}<br>` +-->
+<!--                               `GPU: ${row['GPU']}`;-->
+<!--                    })-->
+<!--                };-->
+<!--            });-->
+
+<!--            const layout = {-->
+<!--                title: 'Price vs Battery Life',-->
+<!--                xaxis: { title: 'Price' },-->
+<!--                yaxis: { title: 'Battery Life' }-->
+<!--            };-->
+
+<!--            Plotly.newPlot('price-battery-chart', data, layout);-->
+<!--        } catch (error) {-->
+<!--            console.error("Error processing data:", error);-->
+<!--        }-->
+<!--    });-->
+<!--</script>-->
 
 <h2>Summary</h2><br>
 This analysis uses linear regression to predict computer prices based on hardware specifications. The correlation heatmap shows that features like Adapter, Ghz, RAM, and Display size are key factors influencing price, with higher power adapters, greater processor frequencies, and larger memory generally associated with higher prices. The brand distribution highlights that the market is primarily dominated by brands like ASUS, Lenovo, and HP, while other brands are less represented. By incorporating these hardware characteristics into the linear regression model, we aim to estimate computer prices more accurately based on their specific configurations.
